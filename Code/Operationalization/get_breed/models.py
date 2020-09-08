@@ -15,7 +15,12 @@ class Pictures(models.Model):
     address =  models.CharField(max_length=200, blank=False, null=False)
     real_breed = models.CharField(max_length=50, blank=True)
     classification = models.CharField(max_length=50, blank=True)
-    estimated_score = models.FloatField(null=True)
+    estimated_score1 = models.FloatField(null=True)
+    estimated_score2 = models.FloatField(null=True)
+    estimated_score3 = models.FloatField(null=True)
+
+    # def __str__(self):
+    #     return self.address
 
     def save_estimate(self):
 
@@ -34,8 +39,10 @@ class Pictures(models.Model):
 
         # Use model to predict
         self.classification = model.predict(photos)[0]
-        estimatives = model.predict_proba(photos)
-        self.estimated_score = estimatives[0].max()
+        estimatives = model.predict_proba(photos)[0]
+        self.estimated_score1 = estimatives[0]
+        self.estimated_score2 = estimatives[1]
+        self.estimated_score3 = estimatives[2]
 #        self.estimated_score = model.predict_proba(photos)[0][0]
         self.save()
 
