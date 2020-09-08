@@ -6,4 +6,4 @@ from django.db import models
 class PicturesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Pictures
-        fields = ['address','real_breed','classification']
+        fields = ['address','real_breed','classification', 'estimated_score']

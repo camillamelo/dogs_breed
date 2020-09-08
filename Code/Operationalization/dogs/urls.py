@@ -26,5 +26,8 @@ router.register(r'pictures', views.PicturesViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     url(r'^classifybreed/', views.ClassifyBreed.as_view()),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('pictures_classifier/', views.PicturesAPIView.as_view()),
+    path('dash/', views.dashboard_home, name="dashboard"),
+    path('django_plotly_dash/', include('django_plotly_dash.urls')),
 ]

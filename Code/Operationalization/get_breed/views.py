@@ -11,9 +11,15 @@ import cv2
 import urllib.request
 import numpy as np
 from matplotlib import pyplot as plt
+from get_breed import dashboard
 import pickle
+from django.shortcuts import render
 PROJECT_FOLDER = 'C:/Users/cammy/OneDrive/MIT IA/git/projeto_dogs/dogs_brand'
 img_h, img_w = 64, 64 # Altura e largura das imagens
+
+def dashboard_home(requests):
+    dashboard.update_dash()
+    return render(requests, 'get_breed/welcome.html')
 
 class PicturesViewSet(viewsets.ModelViewSet):
     """
@@ -21,6 +27,30 @@ class PicturesViewSet(viewsets.ModelViewSet):
     """
     queryset = Pictures.objects.all()
     serializer_class = PicturesSerializer
+
+
+class PicturesAPIView(APIView):
+    """
+    API endpoint that allows wines to be viewed or edited.
+    """
+    def get(self, request):
+        serializer = PicturesSerializer(Pictures.objects.all(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def post(self, request, format=None):
+        data = dict([(k,v[0] if isinstance(v, list) else v)
+                     for k,v in request.data.items()])
+
+        picture, created = Pictures.objects.get_or_create(**data)
+        if created:
+            picture.save_estimate()
+
+        serializer = PicturesSerializer(picture, many=False)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 class ClassifyBreed(APIView):
   """
