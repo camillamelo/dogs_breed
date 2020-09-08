@@ -60,11 +60,42 @@ def update_dash():
     pictures_data = serializers.PicturesSerializer(pictures_list, many=True)
     pictures_table = pandas.DataFrame(pictures_data.data)
 
-    hist_data = [pictures_table['estimated_score1'].values, data.estimated_score1.values]
-    fig_dist = ff.create_distplot(hist_data, ['Menu Ofertado', 'Menu Referencia'],show_hist=False)
+    hist_data1 = [pictures_table['estimated_score1'].values, data.estimated_score1.values]
+    hist_data2 = [pictures_table['estimated_score2'].values, data.estimated_score2.values]
+    hist_data3 = [pictures_table['estimated_score3'].values, data.estimated_score3.values]
+    fig_dist1 = ff.create_distplot(hist_data1, ['Base Produção', 'Treinamento'],show_hist=False)
+    fig_dist2 = ff.create_distplot(hist_data2, ['Base Produção', 'Treinamento'],show_hist=False)
+    fig_dist3 = ff.create_distplot(hist_data3, ['Base Produção', 'Treinamento'],show_hist=False)
     ntop = 10
 
     app.layout = html.Div([
+        html.H1(children='Dashboard de Raça de Cachorros'),
+
+        html.P(children='''
+            Desenvolvimento de modelos de previsão da raça a partir da foto de um cachorro
+        '''),
+
+        html.Div([
+            html.H2('Distribuição do score das raças'),
+            html.H3(classes.values[0]),
+            dcc.Graph(
+                id='score-dist',
+                figure=fig_dist1
+            ),
+            html.H3(classes.values[1]),
+            dcc.Graph(
+                id='score-dist2',
+                figure=fig_dist2
+            ),
+            html.H3(classes.values[2]),
+            dcc.Graph(
+                id='score-dist3',
+                figure=fig_dist3
+            )
+        ], className="six columns"),
+
+        html.H3('Visualização das classificações'),
+
         dcc.Dropdown(
             id='image-dropdown',
             options=[{'label': i[0], 'value': i}  for i in pictures_table.values],
