@@ -10,12 +10,16 @@ from django_plotly_dash import DjangoDash
 from get_breed import models
 from get_breed import serializers
 import plotly.figure_factory as ff
-
+import requests
+import urllib.request
 import numpy as np
+
 
 dev_data = 'C:/Users/cammy/OneDrive/MIT IA/git/projeto_dogs/dogs_brand/Data/Modeling/dev_results.jbl'
 classes_file = 'C:/Users/cammy/OneDrive/MIT IA/git/projeto_dogs/dogs_brand/Data/Modeling/classes.jbl'
 
+baseurl = 'https://dog.ceo/api/'
+randomappend = '/images/random/'
 
 
 #with open(classes_file, 'rb') as f:
@@ -49,6 +53,31 @@ app = DjangoDash(
 
 def update_image_src(value):
     return value[0], value[1], value[2], value[3], value[4], value[5]
+
+@app.callback([
+    dash.dependencies.Output('image_random', 'src'),
+    dash.dependencies.Output('real_breed_random', 'children'),
+    dash.dependencies.Output('classification_random', 'children'),
+    dash.dependencies.Output('estimated_score1_random', 'children'),
+    dash.dependencies.Output('estimated_score2_random', 'children'),
+    dash.dependencies.Output('estimated_score3_random', 'children')],
+    [dash.dependencies.Input('my-button', 'n_clicks'),
+    dash.dependencies.Input('classes-dropdown', 'value')])
+
+def on_click(n_clicks, value):
+    filesurl = baseurl + 'breed/' + value + randomappend
+    imageurl = requests.get(filesurl).json()
+    breedimage = imageurl['message']
+
+    payload = {
+        'address' : breedimage,
+        'real_breed' : value
+    }
+    posturl = 'http://127.0.0.1:8000/pictures_classifier/'
+
+    picture_obj = requests.post(posturl, json=payload).json()
+
+    return breedimage, value, picture_obj['classification'], picture_obj['estimated_score1'], picture_obj['estimated_score2'], picture_obj['estimated_score2']
 
 
 def update_dash():
@@ -113,6 +142,38 @@ def update_dash():
                             html.Tr([html.Td(classes.values[0]), html.Td(id='estimated_score1')]),
                             html.Tr([html.Td(classes.values[1]), html.Td(id='estimated_score2')]),
                             html.Tr([html.Td(classes.values[2]), html.Td(id='estimated_score3')]),
+                        ])
+                    )
+                ])
+            )
+        ]),
+        html.Div([
+            html.H3('Imagem Randômica'),
+            html.Table(
+                html.Tr([
+                    html.Td(dcc.Dropdown(
+                        id='classes-dropdown',
+                        options=[{'label': i[0], 'value': i[0]}  for i in classes.values],
+                        value=classes.values[0]
+                    )),
+                    html.Td(
+                         html.Button('Pegar Imagem', id='my-button')
+                    )
+                ])
+            )
+        ]),
+        html.Div([
+            html.Table(
+                html.Tr([
+                    html.Td(html.Img(id='image_random')),
+                    html.Td(
+                        html.Table([
+                            html.Tr([html.Td('Real Breed:'), html.Td(id='real_breed_random')]),
+                            html.Tr([html.Td('Classification:'), html.Td(id='classification_random')]),
+                            html.Tr([html.Td('Estimated Score:')]),
+                            html.Tr([html.Td(classes.values[0]), html.Td(id='estimated_score1_random')]),
+                            html.Tr([html.Td(classes.values[1]), html.Td(id='estimated_score2_random')]),
+                            html.Tr([html.Td(classes.values[2]), html.Td(id='estimated_score3_random')]),
                         ])
                     )
                 ])
